@@ -12,7 +12,6 @@
 
     <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
     <link href="bootstrap-3.3.7-dist/assets/css/ie10-viewport-bug-workaround.css" rel="stylesheet">
-
 </head>
 
 <body>
@@ -67,58 +66,84 @@
     <div class="container">
         <!-- Bildquelle: Wikipedia -->
         <img src="grafik/header_small.png" alt="Salvatores Pizza-Express" class="img-responsive">
-        <h1>Extra-Zutaten</h1>
-        <p>Hier finden sie alle Extras</p>
+        <h1>Gästebuch</h1>
+        <p>Bewerten Sie unsere Speisen</p>
 
     </div>
 </div>
 
 <div class="container">
 
-    <p class="lead">
-        <?php
-        require 'functions/dbconnect.php';
+    <?php
+    if (isset($_REQUEST['gesendet']))
+    {
+        //TODO Bewertung in der Datenbank speichern
+        require "functions/dbconnect.php";
 
-        $query = "SELECT count(*) FROM extrazutaten";
-        $result = mysqli_query($link, $query);
-        $row = mysqli_fetch_row($result);
-        echo "Anzahl der Zutaten: ".$row[0]."<br>";
+        $kundenname = htmlspecialchars($_REQUEST['kundenname']);
+        $email = htmlspecialchars($_REQUEST['email']);
+        $note = floor($_REQUEST['note']);
+        $bemerkung=htmlspecialchars($_REQUEST['bemerkung']);
 
-        echo "Zutaten (alphabetisch): ";
-        $query = "SELECT name FROM extrazutaten ORDER BY name";
+        $query = "INSERT INTO gaestebuch SET 
+          kundenname='$kundenname',
+          email='$email',
+          note='$note',
+          bemerkung='$bemerkung',
+          datum=now()";
+
+        //echo "<hr>SQL_DEBUG: $query<hr>";
         $result = mysqli_query($link, $query);
-        while ($row = mysqli_fetch_assoc($result))
+        if ($result)
         {
-            echo $row['name'] . " ";
+            echo "Daten erfolgreich gespeichert!";
+        }
+        else
+        {
+            echo "Fehler: " . mysqli_error($link);
         }
 
-        echo "<br>Zutaten (kostenlos): ";
-        $query = "SELECT name FROM extrazutaten WHERE preis = 0 ORDER BY name";
-        $result = mysqli_query($link, $query);
-        while ($row = mysqli_fetch_assoc($result))
-        {
-            echo $row['name'] . " ";
-        }
-
-
-        echo "<br><table class = table><th>Name</th><th>Preis(absteigend)</th>";
-        $query = "SELECT name,preis FROM extrazutaten ORDER BY preis DESC";
-        $result = mysqli_query($link, $query);
-        while ($row = mysqli_fetch_assoc($result))
-        {
-            echo "<tr><td>".$row['name'] . "</td><td>".number_format($row['preis'], 2, ",", ".")."</td></tr>";
-        }
-        echo "</table>";
-
-        echo "<br><table class = table><th>Name</th><th>Preis(aufsteigend)</th>";
-        $query = "SELECT name,preis FROM extrazutaten ORDER BY preis ASC";
-        $result = mysqli_query($link, $query);
-        while ($row = mysqli_fetch_assoc($result))
-        {
-            echo "<tr><td>".$row['name'] . "</td><td>".number_format($row['preis'], 2, ",", ".")."</td></tr>";
-        }
-        echo "</table>";
+    }
+    else
+    {
         ?>
+
+
+        <p>
+            Wie haben Ihnen unsere Pizza Spezialitäten geschmeckt?
+
+        <form method="post" action="gaestebuch.php">
+            <input type="hidden" name="gesendet" value="1">
+
+            <div class="form-group">
+                <label>Name:</label>
+                <input type="text" name="kundenname" value="" class="form-control">
+            </div>
+
+            <div class="form-group">
+                <label>E-Mail (Angabe freiwillig):</label>
+                <input type="text" name="email" value="" class="form-control">
+            </div>
+
+            <div>Ihre Bewertung (Schulnote):<br>
+                <input type="radio" name="note" value="1" style="margin-left:20px">1 (sehr gut)</br>
+                <input type="radio" name="note" value="2" style="margin-left:20px">2 (gut)</br>
+                <input type="radio" name="note" value="3" style="margin-left:20px">3 (befriedigend)</br>
+                <input type="radio" name="note" value="4" style="margin-left:20px">4 (ausreichend)</br>
+                <input type="radio" name="note" value="5" style="margin-left:20px">5 (mangelhaft)</br>
+            </div>
+
+            <div class="form-group">
+                <label>Bemerkung:</label>
+                <textarea class="form-control" name="bemerkung"></textarea>
+            </div>
+
+            <button type="submit" class="btn btn-success">Senden</button>
+
+        </form>
+        <?php
+    }
+    ?>
     </p>
 
     <hr>
