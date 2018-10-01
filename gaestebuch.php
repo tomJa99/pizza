@@ -77,13 +77,13 @@
     <?php
     if (isset($_REQUEST['gesendet']))
     {
-        //TODO Bewertung in der Datenbank speichern
         require "functions/dbconnect.php";
 
-        $kundenname = htmlspecialchars($_REQUEST['kundenname']);
-        $email = htmlspecialchars($_REQUEST['email']);
+        $kundenname = htmlspecialchars($_REQUEST['kundenname'], ENT_QUOTES);
+        $email = htmlspecialchars($_REQUEST['email'], ENT_QUOTES);
         $note = floor($_REQUEST['note']);
-        $bemerkung=htmlspecialchars($_REQUEST['bemerkung']);
+        $bemerkung = htmlspecialchars($_REQUEST['bemerkung'], ENT_QUOTES);   //ENT_QUOTES entfernt einfache Anführungszeichen
+        $bemerkung = mysqli_real_escape_string($link, $bemerkung);  //Verhindert MySQL-Injection
 
         $query = "INSERT INTO gaestebuch SET 
           kundenname='$kundenname',
@@ -148,12 +148,16 @@
 
     <hr>
 
+
+</div> <!-- /container -->
+
+<div class="container">
+    <a class="btn btn-success" href="bewertung.php">Zu den Bewertungen</a>
     <footer>
         <p>&copy; 2016 Salvatores Pizza Express, Musterstadt (diese Website ist ein Übungsprojekt für
             Programmier-Workshops, Kurse und Vorlesungen von Simon A. Frank)</p>
     </footer>
-</div> <!-- /container -->
-
+</div>
 
 <!-- Bootstrap core JavaScript
 ================================================== -->

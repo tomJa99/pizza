@@ -38,7 +38,7 @@ require "functions/calculators.php";
 
             <ul class="nav navbar-nav">
                 <li><a href="index.html">Startseite</a></li>
-                <li><a href="#">Gästebuch</a></li>
+                <li><a href="gaestebuch.php">Gästebuch</a></li>
                 <li><a href="#">Shop</a></li>
                 <li><a href="preisausschreiben.html">Preisausschreiben</a></li>
                 <li class="dropdown">

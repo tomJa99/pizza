@@ -32,7 +32,7 @@
 
             <ul class="nav navbar-nav">
                 <li><a href="index.html">Startseite</a></li>
-                <li><a href="#">Gästebuch</a></li>
+                <li><a href="gaestebuch.php">Gästebuch</a></li>
                 <li><a href="#">Shop</a></li>
                 <li><a href="preisausschreiben.html">Preisausschreiben</a></li>
                 <li class="dropdown">
@@ -77,14 +77,14 @@
     <?php
     require 'functions/dbconnect.php';
 
-    $query="SELECT kundenname,note,bemerkung,datum FROM gaestebuch";
+    $query="SELECT kundenname,note,bemerkung,datum FROM gaestebuch WHERE freigabe=1";
     if (isset($_REQUEST['filter']) && $_REQUEST['filter'] =="gute")
     {
-        $query.= " WHERE note <=2";
+        $query.= " AND note <=2 ";
     }
     else if (isset($_REQUEST['filter']) && $_REQUEST['filter'] == "aktuell")
     {
-        $query.=" WHERE datum>DATE_SUB(NOW(), INTERVAL 1 HOUR)";
+        $query.=" AND datum>DATE_SUB(NOW(), INTERVAL 1 HOUR)";
     }
 
     $result = mysqli_query($link, $query);
@@ -99,7 +99,7 @@
     }
 
     //? ruft die derzeitige Seite ("bewertung.php") auf
-    echo "<p><a class='btn btn-success' href='?filter=gute'>Nur gute Bewertungen anzeigen</a><a class='btn btn-success' href='?filter=aktuell'>Nur aktuelle Bewertungen anzeigen</a></p>";
+    echo "<p><a class='btn btn-success' href='?filter=gute'>Nur gute Bewertungen anzeigen</a><a class='btn btn-success' href='?filter=aktuell' style='margin-left: 3em'>Nur aktuelle Bewertungen anzeigen</a></p>";
 
     ?>
 
