@@ -1,3 +1,9 @@
+<?php
+declare(strict_types=1);
+session_start();
+?>
+
+
 <!DOCTYPE html>
 <html lang="de">
 <head>
@@ -108,6 +114,9 @@
     <footer>
         <p>&copy; 2016 Salvatores Pizza Express, Musterstadt (diese Website ist ein Übungsprojekt für
             Programmier-Workshops, Kurse und Vorlesungen von Simon A. Frank)</p>
+        <?php
+            require "requestInfo.php";
+        ?>
     </footer>
 </div> <!-- /container -->
 

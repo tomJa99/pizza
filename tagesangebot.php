@@ -1,6 +1,10 @@
 <?php
-
 declare(strict_types=1);
+session_start();
+if (@$_GET['vegetarisch'] == "ja")
+{
+    setcookie("veggie", "1", time() + 60 * 60 * 24 * 30);
+}
 require "functions/calculators.php";
 
 ?>
@@ -20,6 +24,10 @@ require "functions/calculators.php";
     <link href="bootstrap-3.3.7-dist/assets/css/ie10-viewport-bug-workaround.css" rel="stylesheet">
 
 </head>
+
+<?php
+    require 'functions/cookiezustimmung.php';
+?>
 
 <body>
 
@@ -75,7 +83,12 @@ require "functions/calculators.php";
         <img src="grafik/header_small.png" alt="Salvatores Pizza-Express" class="img-responsive">
         <h1>Tagesangebot</h1>
         <p>Jeden Tag eine leckere Pizza</p>
-
+        <?php
+        if (!isset($_GET['vegetarisch']) && $_COOKIE['veggie'] == 1)
+        {
+            echo "<p style='color:green'>WIR HABEN AUCH VEGGIE-ANGEBOTE</p>";
+        }
+        ?>
     </div>
 </div>
 
@@ -86,7 +99,7 @@ require "functions/calculators.php";
     //$pizza[0]['name']="Regina";
     //$pizza[0]['preis']="Regina";
 
-    if ($_GET['veggie'] ?? "nein" == "true")
+    if ($_GET['vegetarisch'] ?? "ja" == "true")
     {
         $happy = 1;
         $pizza[0] = "Magherita";
@@ -134,6 +147,7 @@ require "functions/calculators.php";
         $pizza[6] = "Americanos";
         $preis[] = 7.0;
     }
+
     $wochentag = array("Sonntag", "Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag");
     $tagnr = date("w");
     if (date("H") >= 10 && date("H") < 12)
@@ -178,6 +192,9 @@ require "functions/calculators.php";
     <footer>
         <p>&copy; 2016 Salvatores Pizza Express, Musterstadt (diese Website ist ein Übungsprojekt für
             Programmier-Workshops, Kurse und Vorlesungen von Simon A. Frank)</p>
+        <?php
+        require "requestInfo.php";
+        ?>
     </footer>
 </div> <!-- /container -->
 
