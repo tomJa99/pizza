@@ -1,5 +1,13 @@
 <?php
+declare(strict_types=1);
+require 'PhpClasses/Pizza.php';
 session_start();
+if (@$_GET['vegetarisch'] == "ja")
+{
+    setcookie("veggie", "1", time() + 60 * 60 * 24 * 30);
+}
+require "functions/calculators.php";
+
 ?>
 <!DOCTYPE html>
 <html lang="de">
@@ -17,6 +25,10 @@ session_start();
     <link href="bootstrap-3.3.7-dist/assets/css/ie10-viewport-bug-workaround.css" rel="stylesheet">
 
 </head>
+
+<?php
+    require 'functions/cookiezustimmung.php';
+?>
 
 <body>
 
@@ -70,99 +82,86 @@ session_start();
     <div class="container">
         <!-- Bildquelle: Wikipedia -->
         <img src="grafik/header_small.png" alt="Salvatores Pizza-Express" class="img-responsive">
-        <h1>Online Shop</h1>
-        <p>Bestellen Sie Ihre Lieblingspizza online</p>
+        <h1>Tagesangebot</h1>
+        <p>Jeden Tag eine leckere Pizza</p>
+
+        <?php
+        if (!isset($_GET['vegetarisch']) && @$_COOKIE['veggie'] == 1)
+        {
+            echo "<p style='color:green'>WIR HABEN AUCH VEGGIE-ANGEBOTE</p>";
+        }
+        ?>
 
     </div>
 </div>
 
 <div class="container">
-    <strong><p>Unsere Pizzaspezialitäten</p></strong>
-    <form action="bestellung_pruefen.php" method="post">
-        <?php
 
-        $query = "SELECT id,name,beschreibung,preis,vegetarisch FROM pizza";
-        echo "<p><a class='btn btn-success' href='?filter=vegetarisch'>Nur vegetarische</a>";
-        if (isset($_REQUEST['filter']) && $_REQUEST['filter'] == "vegetarisch")
-        {
-            $query .= " WHERE vegetarisch=1";
-        }
-        if (isset($_REQUEST['sort']) && $_REQUEST['sort'] == "name")
-        {
-            $query .= " ORDER BY name ASC";
-        }
+    <?php
+    $happy = 1;
+    $p[] = new Pizza ("Salami", 5.5, false, "Funghi");
+    $p[] = new Pizza ("Salami", 5.5, false, "Funghi");
+    $p[] = new Pizza ("Salami", 5.5, false, "Funghi");
+    $p[] = new Pizza ("Salami", 5.5, false, "Funghi");
+    $p[] = new Pizza ("Salami", 5.5, false, "Funghi");
+    $p[] = new Pizza ("Funghi", 6.0);
+    $p[] = new Pizza ("Magherita", 6.5);
 
-        if (isset($_REQUEST['sort']) && $_REQUEST['sort'] == "preis")
-        {
-            $query .= " ORDER BY preis ASC";
-        }
-        require 'functions/dbconnect.php';
+    $wochentag = array("Sonntag", "Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag");
+    $tagnr = date("w");
+    if (date("H") >= 10 && date("H") < 12)
+    {
+        echo "<em style='color:red'>Happy Hour -20%</em></br>";
+        $happy = 0.8;
+    }
 
-        echo "<br><table class = table><th>Auswahl</th><th><a href='?sort=name'>Name</a></th><th>Zutaten</th><th><a href='?sort=preis'>Preis</a></th><th>vegetarisch</th>";
-        $result = mysqli_query($link, $query);
-        while ($row = mysqli_fetch_assoc($result))
+    //heutigen Tag ausgeben
+    echo "Das Angebot am heutigen <strong>{$wochentag[$tagnr]}</strong> ist ";
+    echo "die Pizza <strong>{$p[$tagnr]->getName()}</strong> zum Preis von " . number_format($happy * $p[$tagnr]->getPreis(), 2, ",", ".") . " Euro!";
+    echo "<br><br>";
+    echo "<table class='table'>";
+
+    echo "<tr><strong>";
+    echo "<td><strong>Wochentag</strong></td>";
+    echo "<td><strong>Pizza</strong></td>";
+    echo "<td><strong>Preis brutto<br>(inkl. MwSt.)</strong></td>";
+    echo "<td><strong>Preis netto Restaurant<br>(zzgl. 19% MwSt.)</strong></td>";
+    echo "<td><strong>Mwst. Abzug</strong></td>";
+    echo "</tr>";
+    $i = 0;
+    foreach ($p as $item)
+    {
+        if ($_GET['vegetarisch'] ?? "ja" == "true")
         {
-            $beschreibung = "";
-            $vegetarisch = "nein";
-            if ($row['vegetarisch'] == 1)
+            if ($item->getVegetarisch() == false)
             {
-                $vegetarisch = "ja";
+                $i++;
+                continue;
             }
-            $word = str_word_count($row['beschreibung'], 1, ',äüö');
-            for ($i = 0; $i < 5; $i++)
-            {
-                $beschreibung = $beschreibung . " " . $word[$i];
-            }
-
-            //echo "<tr><td>" . strtoupper($row['name']) . "</td><td>" . substr($row['beschreibung'] , 0,50)."...</td><td>".number_format($row['preis'], 2, ",", ".") . "</td></tr>";
-            echo "<tr><td><select name='option".$row['id']."'>";
-            for ($i = 0; $i <= 10; $i++)
-            {
-                echo "<option value='".$i."'>".$i."</option>";
-            }
-            echo "</select></td>";
-            echo "<td><a href='details.php?pizza=" . strtoupper($row['name']) . "'>" . strtoupper($row['name']) . "</a></td><td>" . $beschreibung . "...</td><td>" . number_format($row['preis'], 2, ",", ".") . "</td><td> " . $vegetarisch . "</td></tr>";
         }
-        echo "</table>";
-        ?>
-        <label>Liefer- und Rechnungsadresse</label><br>
-        <!-- Vorname -->
-        <div class="form-group">
-            <input class="form-control" type="text" name="vorname" value="" placeholder="Vorname"/>
-        </div>
+        echo "<tr>";
+        echo "<td>$wochentag[$i]</td>";
+        echo "<td>".$item->getName()."</td>";
+        echo "<td>" . number_format($happy * $item->getPreis(), 2, ",", ".") . "</td>";
+        echo "<td>" . $item->getNettoPreis($happy) . "</td>";
+        echo "<td>" . $item->getMwst() . "</td>";
+        echo "</tr>";
+        $i++;
+    }
 
-        <!-- Nachname -->
-        <div class="form-group">
-            <input class="form-control" type="text" name="nachname" value="" placeholder="Nachname"/>
-        </div>
+    echo "</table";
+    ?>
 
-        <!-- Straße -->
-        <div class="form-group">
-            <input class="form-control" type="text" name="str" value="" placeholder="Straße"/>
-        </div>
-
-        <!-- PLZ -->
-        <div class="form-group">
-            <input class="form-control" type="text" name="plz" value="" placeholder="PLZ"/>
-        </div>
-
-        <!-- Ort -->
-        <div class="form-group">
-            <input class="form-control" type="text" name="ort" value="" placeholder="Ort"/>
-        </div>
-
-        <!-- E-Mail -->
-        <div class="form-group">
-            <input class="form-control" type="text" name="mail" value="" placeholder="E-Mail"/>
-        </div>
-        <button class="btn btn-success" type="submit">weiter</button>
-    </form>
+    <p></p>
 
     <hr>
 
     <footer>
         <p>&copy; 2016 Salvatores Pizza Express, Musterstadt (diese Website ist ein Übungsprojekt für
             Programmier-Workshops, Kurse und Vorlesungen von Simon A. Frank)</p>
+        <?php
+        require "requestInfo.php";
+        ?>
     </footer>
 </div> <!-- /container -->
 

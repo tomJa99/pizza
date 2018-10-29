@@ -13,9 +13,9 @@ function berechneAufpreis()
     return $ergebnis;
 }
 
-function berechneNettoPreis(float $bruttoPreisInEuro, float $mwst = 1.19): String
+function berechneNettoPreis(float $bruttoPreisInEuro, float $happy = 1, float $mwst = 1.19): String
 {
-    $ergebnis = $bruttoPreisInEuro / $mwst;
+    $ergebnis = $bruttoPreisInEuro * $happy / $mwst;
     $ergebnis = number_format($ergebnis, 2, ",", ".");
     return $ergebnis;
 }

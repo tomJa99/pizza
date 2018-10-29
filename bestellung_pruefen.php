@@ -82,6 +82,8 @@ session_start();
 
         echo "<label>Sie haben folgendes bestellt:</label>";
         $summe = 0;
+        $fehler = 0;
+        $counter = 0;
         for ($i = 1; $i <= 8; $i++)
         {
             $query = "SELECT id,name,preis,vegetarisch FROM pizza WHERE id=" . $i;
@@ -91,27 +93,110 @@ session_start();
             $option = $_REQUEST['option' . $i];
             if ($option != 0)
             {
+                $counter++;
                 $summe += ($option * $row['preis']);
                 echo "<p>" . $option . " x Pizza " . $row['name'] . " je " . number_format($row['preis'], 2, ",", ".") . " € </p>";
             }
         }
+        if ($counter == 0)
+        {
+            echo "<div class='alert alert-danger' role='alert'>Sie haben keine Pizza ausgewählt!</div>";
+            $fehler++;
+        }
         echo "<label>Rechnungssumme: " . number_format($summe, 2, ",", ".") . " €</label><br>";
-        $name = $_REQUEST['vorname'] . " " . $_REQUEST['nachname'];
-        $str = $_REQUEST['str'];
-        $plz = $_REQUEST['plz'];
-        $ort = $_REQUEST['ort'];
-        $mail = $_REQUEST['mail'];
-        $_SESSION['vorname'] = $_REQUEST['vorname'] ;
-        $_SESSION['nachname'] = $_REQUEST['nachname'] ;
-        $_SESSION['str'] = $str;
-        $_SESSION['plz'] = $plz;
-        $_SESSION['ort'] = $ort;
-        $_SESSION['mail'] = $mail;
-        echo "<em>$name<br>$str<br>$plz $ort<br>$mail</em>";
+
+
+        /*Daten einlesen*/
+        $vorname = htmlspecialchars($_REQUEST['vorname']);
+        $nachname = htmlspecialchars($_REQUEST['nachname']);
+        $str = htmlspecialchars($_REQUEST['str']);
+        $plz = htmlspecialchars($_REQUEST['plz']);
+        $ort = htmlspecialchars($_REQUEST['ort']);
+        $mail = htmlspecialchars($_REQUEST['mail']);
+
+
+        /*Validierung*/
+        if ($vorname == "")
+        {
+            echo "<div class='alert alert-danger' role='alert'>Geben Sie Ihren Vornamen an!</div>";
+            $fehler++;
+        }
+        else
+        {
+            echo "<div class='alert alert-success' role='alert'>Vorname: $vorname</div>";
+        }
+        if ($nachname == "")
+        {
+            echo "<div class='alert alert-danger' role='alert'>Geben Sie Ihren Nachnamen an!</div>";
+            $fehler++;
+        }
+        else
+        {
+            echo "<div class='alert alert-success' role='alert'>Nachname: $nachname</div>";
+        }
+        if ($str == "")
+        {
+            echo "<div class='alert alert-danger' role='alert'>Geben Sie Ihre Adresse an!</div>";
+            $fehler++;
+        }
+        else
+        {
+            echo "<div class='alert alert-success' role='alert'>Straße: $str</div>";
+        }
+        if (($plz == "") || (strlen($plz) != 5) || !(ctype_digit($plz)))
+        {
+            echo "<div class='alert alert-danger' role='alert'>Geben Sie eine korrekte Postleitzahl an!</div>";
+            $fehler++;
+        }
+        else
+        {
+            if (substr($plz, -5,1) == "7" && substr($plz, -4,1) == "1")
+            {
+                echo "<div class='alert alert-success' role='alert'>Postleitzahl: $plz</div>";
+            }
+            else
+            {
+                echo "<div class='alert alert-danger' role='alert'>Wir liefern leider nicht in Ihre Gegend!</div>";
+                $fehler++;
+            }
+        }
+        $ort = htmlspecialchars($_REQUEST['ort']);
+        if ($ort == "")
+        {
+            echo "<div class='alert alert-danger' role='alert'>Geben Sie Ihren Wohnort an!</div>";
+            $fehler++;
+        }
+        else
+        {
+            echo "<div class='alert alert-success' role='alert'>Wohnort: $ort</div>";
+        }
+        if (($mail == "") || !filter_var($mail, FILTER_VALIDATE_EMAIL))
+        {
+            echo "<div class='alert alert-danger' role='alert'>Geben Sie Ihre korrekte E-Mail Adresse an!</div>";
+            $fehler++;
+        }
+        else
+        {
+            echo "<div class='alert alert-success' role='alert'>E-Mail: $mail</div>";
+        }
+
+        if ($fehler == 0)
+        {
+            $_SESSION['vorname'] = $vorname;
+            $_SESSION['nachname'] = $nachname;
+            $_SESSION['str'] = $str;
+            $_SESSION['plz'] = $plz;
+            $_SESSION['ort'] = $ort;
+            $_SESSION['mail'] = $mail;
+            echo "<a class='btn btn-success' href='bestellung_speichern.php'>kostenpflichtig bestellen</a>";
+        }
+        else
+        {
+            echo "<a class='btn btn-danger' href='shop.php'>Zurück</a>";
+        }
         echo "<br><br>";
         ?>
     </div>
-    <a class="btn btn-success" href="bestellung_speichern.php">kostenpflichtig bestellen</a>
     <hr>
 
     <footer>
